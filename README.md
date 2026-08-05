@@ -50,13 +50,19 @@ Chains not listed as built-in are Custom Chains, defined by some outside process
 
 ## Kubernetes CNI
 
-Proper operation of the major K8s CNI rely heavily on IPTables. Kube-Proxy is responsible for managing iptables rules for services, where the CNI stages the initial configuration. (See diagrams for kube-proxy nat/masquerade flow).
+Proper operation of the major K8s CNI rely heavily on IPTables. Kube-Proxy is responsible for managing iptables rules for services, where the CNI stages the initial configuration. Kubernetes does prefix all rules with `KUBE-` and inlcudes comments like `/* example comment with rule description or other important info */`.
+(See diagrams for kube-proxy nat/masquerade flow).
 
 ## Bad & Ugly
 
-* Rules are *NOT* aware of each other. One app or security agent can insert or append lines that have a larger effect on the entire chain. This is why disabling firewalld / external firewall rules is important.
+* Rules are *NOT* aware of each other. One app or security agent can insert or append lines that have a larger effect on the entire chain. This is why disabling firewalld / external firewall rules is important. Firewalld might work with a zone-based firewall, recommended only in a lab or dev setting, trusting the kubernetes zone or segment.
 * The userspace `iptables` kernel interface has evolved over the years, the `legacy` mode is deprecated and should move onto `nftables`. *Using both on the same node can cause unintended operations!*
 * eBPF changes the calculus of the rules, because it is bytecode that can be inserted directly into the kernel for networking, security, and observability, but still may require iptables rules for proper Kubernetes CNI operation.
 
+## Wait, an Agent?
+
+The `iptables` dir locally would just include a copy of the netfilter official `iptables` repo, pull it as a submodule as below (it's ignored via .gitignore).
+
+* `git submodule add https://git.netfilter.org/iptables`
 
 ---
